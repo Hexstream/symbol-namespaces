@@ -6,21 +6,21 @@
   (:import-from #:map-bind #:map-bind)
   (:shadow #:find-package
            #:find-symbol)
-  (:export #:namespace
-           #:name-mixin
+  (:export #:define
+           #:ensure
+           #:locate
            #:name
-           #:packages-mixin
-           #:packages-identity-mixin
-           #:packages-name-mixin
-           #:standard-namespace
+           #:name-mixin
 
-           #:intern-package
-           #:find-package
-           #:make-package-name
-
+           #:namespace
            #:intern-symbol
            #:find-symbol
 
-           #:locate
-           #:ensure
-           #:define))
+           #:packages
+           #:intern-package
+           #:find-package
+           #:make-package-name
+           #:packages-identity-mixin
+           #:packages-name-mixin
+
+           #:standard-namespace))

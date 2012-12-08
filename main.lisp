@@ -16,12 +16,12 @@
   (print-unreadable-object (mixin stream :type t)
     (prin1 (symspace:name mixin) stream)))
 
-(defclass symspace:packages-mixin ()
+(defclass symspace:packages ()
   ())
 
 (defgeneric symspace:intern-symbol (symbol symbol-namespace)
   (:argument-precedence-order symbol-namespace symbol)
-  (:method ((symbol symbol) (symbol-namespace packages-mixin))
+  (:method ((symbol symbol) (symbol-namespace symspace:packages))
     (let ((package (symbol-package symbol)))
       (if package
           (identity (intern (symbol-name symbol)
@@ -32,7 +32,7 @@
 
 (defgeneric symspace:find-symbol (symbol symbol-namespace)
   (:argument-precedence-order symbol-namespace symbol)
-  (:method ((symbol symbol) (symbol-namespace packages-mixin))
+  (:method ((symbol symbol) (symbol-namespace symspace:packages))
     (let ((package (symbol-package symbol)))
       (if package
           (let ((managed-package (find-package package symbol-namespace)))
@@ -44,11 +44,11 @@
                  symbol symbol-namespace)))))
 
 
-(defclass symspace:packages-identity-mixin (symspace:packages-mixin)
+(defclass symspace:packages-identity-mixin (symspace:packages)
   ((%packages :reader %packages
               :initform (make-hash-table :test 'eq))))
 
-(defclass symspace:packages-name-mixin (symspace:packages-mixin)
+(defclass symspace:packages-name-mixin (symspace:packages)
   ((%packages :reader %packages
               :initform (make-hash-table :test 'equal))))
 
@@ -130,7 +130,8 @@
         (setf acc (list* value key acc))))))
 
 (defun symspace:ensure (name &rest keys
-                        &key (class 'symspace:standard-namespace))
+                        &key (class 'symspace:standard-namespace)
+                        &allow-other-keys)
   (setf keys (%remove-keys '(:class) keys))
   (let ((existing (symspace:locate name :errorp nil)))
     (cond (existing
