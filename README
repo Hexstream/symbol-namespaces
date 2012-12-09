@@ -8,5 +8,138 @@ conceptually allow multiple definitions of the same kind on a single
 symbol, without conflicts.
 
 
+PACKAGES
+--------
+
+symbol-namespaces exports a single package called SYMBOL-NAMESPACES,
+also nicknamed SYMSPACES and SYMSPACE. This package is designed for
+explicit qualification of symbols, such as symspace:namespace.
+Don't (:use)!
+
+(In this documentation, "namespace" means "symbol-namespace".)
+
+
+API Overview
+------------
+
+The only strict guarantee obeyed by all namespace classes is that they
+inherit from symspace:namespace and implement symspace:find-symbol and
+symspace:intern-symbol.
+
+Namespace classes may also inherit from symspace:packages, in which
+case they also support at least the symspace:find-package and
+symspace:intern-package operations.
+
+
+The main operators of interest for "normal" users of the library are:
+
+- Macro symspace:define defines a namespace and gives it a global name
+  (symbol), or redefines an existing one;
+
+- Function symspace:locate retrieves a namespace by name;
+
+- Generic Function symspace:find-symbol retrieves the "implicitly
+  managed" counterpart of a symbol in a namespace, if there is one, or
+  else returns NIL.
+
+- Generic Function symspace:intern-symbol attempts to
+  symspace:find-symbol, and if the search is unsuccessful, creates and
+  returns an appropriate implicitly managed counterpart for the
+  symbol.
+
+
+The rest of the API mostly has to do with making it easy to define
+custom kinds of namespaces with extended behavior.
+
+For simple uses, it's usually enough to subclass
+symspace:standard-namespace and refine behavior by adding new methods
+on appropriate generic functions.
+
+For heavier customization, one can subclass symspace:namespace
+directly, and define appropriate methods to implement the contract of
+generic functions. It's easy to inherit standard pieces of state and
+behavior with the provided mixins. symspace:standard-namespace really
+just inherits from such mixins.
+
+
+API Details
+-----------
+
+Macro symspace:define name &body options
+=> new-or-redefined-namespace
+
+Defines a namespace and gives it a global NAME (symbol),
+or redefines an existing one.
+
+The expansion calls symspace:ensure with the NAME and the OPTIONS,
+converted from an alist to a plist. If the :class option is specified,
+it must have only one argument, which is the class designator which
+will be forwarded to symspace:ensure. Otherwise, the default is
+symspace:standard-namespace. symspace:standard-namespace doesn't
+support any options other than :class, but other subclasses of
+symspace:namespace might. In that case, the value of the option in the
+plist will be a list of the CDR of the option. For instance, an option
+of (:option 1 2 3) would produce ":option (1 2 3)" in the plist.
+Neither the option keys nor values are evaluated.
+
+
+Function symspace:ensure name
+  &rest keys &key (class 'symspace:standard-namespace) &allow-other-keys
+=> new-or-redefined-namespace
+
+
+Accessor LOCATE
+
+
+Marker Class symspace:namespace
+
+All namespace kinds inherit from this class. At least
+symspace:find-symbol and symspace:intern-symbol are supported.
+symspace:standard-namespace provides a ready-to-use implementation.
+
+
+Mixin Class symspace:name-mixin
+
+Provides a slot of type SYMBOL, filled by initarg :name, whose value
+is retrieved by symspace:name. Also provides a PRINT-OBJECT method
+that includes the name of the namespace in its output.
+
+
+Generic Function symspace:name
+
+Retrieves the name of a namespace. Typically implemented by
+symspace:name-mixin.
+
+
+
+Marker Class symspace:packages
+
+Namespace classes inheriting from this class implicitly manage some
+packages internally, and support the symspace:find-package and
+symspace:intern-package operations. A related operation that might be
+supported is symspace:make-package-name, potentially used by
+symspace:intern-package.
+
+
+Mixin Class PACKAGES-IDENTITY-MIXIN
+
+Mixin Class PACKAGES-NAME-MIXIN
+
+Class STANDARD-NAMESPACE
+
+
+Generic Function INTERN-PACKAGE
+
+Generic Accessor FIND-PACKAGE
+
+Generic Function MAKE-PACKAGE-NAME
+
+
+Generic Function INTERN-SYMBOL
+
+Generic Function FIND-SYMBOL
+
+
+
 This library is in the Public Domain.
 See the UNLICENSE file for details.
