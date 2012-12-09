@@ -106,18 +106,18 @@
                  package-name)))
      package)))
 
-(defun symspace:locate (symbol &key (errorp t))
-  (check-type symbol symbol)
-  (or (gethash symbol *namespaces*)
+(defun symspace:locate (name &key (errorp t))
+  (check-type name symbol)
+  (or (gethash name *namespaces*)
       (when errorp
         (error "There is no ~S with name ~S."
-               'symspace:namespace symbol))))
+               'symspace:namespace name))))
 
-(defun (setf symspace:locate) (new symbol &key (errorp t))
+(defun (setf symspace:locate) (new name &key (errorp t))
   (declare (ignore errorp))
-  (check-type symbol (and symbol (not null)))
+  (check-type name (and symbol (not null)))
   (check-type new symspace:namespace)
-  (setf (gethash symbol *namespaces*)
+  (setf (gethash name *namespaces*)
         new))
 
 (defun %remove-keys (keys plist)

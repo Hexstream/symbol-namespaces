@@ -87,32 +87,67 @@ Function symspace:ensure name
   &rest keys &key (class 'symspace:standard-namespace) &allow-other-keys
 => new-or-redefined-namespace
 
+Creates a new namespace named NAME, or redefines it if it already
+exists.
 
-Accessor LOCATE
+If a new namespace is created, it will be of class CLASS and the other
+KEYS are passed to MAKE-INSTANCE.
+
+If a namespace with that name is already registered, then if the CLASS
+is different than the class of the existing instance, CHANGE-CLASS is
+called with the CLASS and other KEYS. If the CLASS is the same, then
+REINITIALIZE-INSTANCE is called with the instance and the other KEYS.
 
 
-Marker Class symspace:namespace
+Accessor symspace:LOCATE name &key (errorp t)
+=> namespace-or-nil
 
-All namespace kinds inherit from this class. At least
-symspace:find-symbol and symspace:intern-symbol are supported.
-symspace:standard-namespace provides a ready-to-use implementation.
+Returns the namespace registered with name NAME. If there is no
+registered namespace with name NAME, then an error is signaled if
+ERRORP is true, else NIL is returned.
 
 
-Mixin Class symspace:name-mixin
+Generic Function symspace:NAME
+=> name
+
+Retrieves the name of a namespace. Typically implemented by
+symspace:name-mixin.
+
+
+Mixin Class symspace:NAME-MIXIN
 
 Provides a slot of type SYMBOL, filled by initarg :name, whose value
 is retrieved by symspace:name. Also provides a PRINT-OBJECT method
 that includes the name of the namespace in its output.
 
 
-Generic Function symspace:name
+Marker Class symspace:NAMESPACE
 
-Retrieves the name of a namespace. Typically implemented by
-symspace:name-mixin.
+All namespace kinds inherit from this class. At least
+symspace:find-symbol and symspace:intern-symbol are supported.
+symspace:standard-namespace provides a ready-to-use implementation.
 
 
+Generic Function symspace:INTERN-SYMBOL symbol symbol-namespace
+=> symbol
 
-Marker Class symspace:packages
+Argument precedence order: symbol-namespace, symbol
+
+Attempts to symspace:FIND-SYMBOL, and if the search is unsuccessful,
+creates and returns an appropriate implicitly managed counterpart for
+the symbol.
+
+
+Generic Function symspace:FIND-SYMBOL symbol symbol-namespace
+=> symbol-or-nil
+
+Argument precedence order: symbol-namespace, symbol
+
+Retrieves the "implicitly managed" counterpart of a symbol in a
+namespace, if there is one, or else returns NIL.
+
+
+Marker Class symspace:PACKAGES
 
 Namespace classes inheriting from this class implicitly manage some
 packages internally, and support the symspace:find-package and
@@ -120,24 +155,55 @@ symspace:intern-package operations. A related operation that might be
 supported is symspace:make-package-name, potentially used by
 symspace:intern-package.
 
-
-Mixin Class PACKAGES-IDENTITY-MIXIN
-
-Mixin Class PACKAGES-NAME-MIXIN
-
-Class STANDARD-NAMESPACE
+See symspace:packages-identity-mixin and symspace:packages-name-mixin
+for built-in implementations. symspace:standard-namespace uses the
+former.
 
 
-Generic Function INTERN-PACKAGE
+Generic Function symspace:INTERN-PACKAGE package symbol-namespace
+=> package
 
-Generic Accessor FIND-PACKAGE
+Argument precedence order: symbol-namespace, package
 
-Generic Function MAKE-PACKAGE-NAME
+Attempts to symspace:FIND-PACKAGE, and if the search is unsuccessful,
+creates and returns an appropriate implicitly managed counterpart for
+the package.
 
 
-Generic Function INTERN-SYMBOL
+Generic Accessor symspace:FIND-PACKAGE package symbol-namespace
+=> package-or-nil
 
-Generic Function FIND-SYMBOL
+Argument precedence order: symbol-namespace, package
+
+Retrieves the "implicitly managed" counterpart of a package in a
+namespace, if there is one, or else returns NIL.
+
+
+Generic Function symspace:MAKE-PACKAGE-NAME package symbol-namespace
+=> name
+
+Computes an appropriate package name for a new "implicitly managed"
+counterpart of PACKAGE.
+
+
+Mixin Class symspace:PACKAGES-IDENTITY-MIXIN
+
+Implements symspace:packages. Packages are found and interned on the
+basis of their identity (EQ comparison of packages). This is what
+symspace:standard-namespace uses.
+
+
+Mixin Class symspace:PACKAGES-NAME-MIXIN
+
+Implements symspace:packages. Packages are found and interned on the
+basis of equality of their package names.
+
+
+Class symspace:STANDARD-NAMESPACE
+
+A ready-to-use implementation of symspace:namespace. Simply inherits
+from symspace:name-mixin, symspace:packages-identity-mixin, and
+symspace:namespace.
 
 
 
