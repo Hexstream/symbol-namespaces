@@ -148,13 +148,14 @@
   (check-type name symbol)
   (let ((plist
          (let (classp)
-           (map-bind (mapcan) ((option options))
-             (destructuring-bind (kind &rest values) option
-               (if (eq kind :class)
-                   (destructuring-bind (supplied-class) values
-                     (prog1 (list :class `',supplied-class)
-                       (if classp
-                           (error "Duplicate :class option in ~S." options)
-                           (setf classp t))))
-                   (list `',kind `',values)))))))
+           (mapcan (lambda (option)
+                     (destructuring-bind (kind &rest values) option
+                       (if (eq kind :class)
+                           (destructuring-bind (supplied-class) values
+                             (prog1 (list :class `',supplied-class)
+                               (if classp
+                                   (error "Duplicate :class option in ~S." options)
+                                   (setf classp t))))
+                           (list `',kind `',values))))
+                   options))))
     `(symspace:ensure ',name ,@plist)))

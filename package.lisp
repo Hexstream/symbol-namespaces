@@ -3,7 +3,6 @@
               #:symspaces
               #:symspace)
   (:use #:cl)
-  (:import-from #:map-bind #:map-bind)
   (:shadow #:find-package
            #:find-symbol)
   (:export #:define
